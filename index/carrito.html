@@ -3,64 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carrito de Compras - FERRAHUB</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="../css/paginaprincipal.css">
-    <link rel="stylesheet" href="registro.html">
+    <title>Carrito de Compras</title>
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
 </head>
 <body>
-<!-- Navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <a class="navbar-brand" href="../index.html">FERRAHUB</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ml-auto">
-            <li class="dropdown-item"><a class="nav-link" href="../index.html">Inicio</a></li>
-            <li class="dropdown-item"><a class="nav-link" href="../index/Promociones.html">Promociones</a></li>
-            <li class="dropdown-item"><a class="nav-link" href="../index/registro.html">Iniciar Sesión/Registrarse</a></li>
-        </ul>
-    </div>
-</nav>
-
-
-<div class="container mt-5">
-    <h2 class="text-center mb-4">Carrito de Compras</h2>
-    <table class="table table-bordered text-center">
-        <thead class="thead-dark">
-            <tr>
-                <th>Producto</th>
-                <th>Precio</th>
-                <th>Cantidad</th>
-                <th>Total</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody id="cart-items">
-            <!-- Los productos se añadirán aquí dinámicamente -->
-        </tbody>
-    </table>
-
-    <div class="d-flex justify-content-between align-items-center">
-        <h3>Total: <span id="cart-total">$0</span></h3>
-        <div>
-            <button class="btn btn-success mr-2" onclick="buyNow()">Comprar</button>
-            <button class="btn btn-primary" onclick="checkout()">Ir a Pagar</button>
-        </div>
+    <div class="container mt-5">
+        <h1 class="text-center">Carrito de Compras</h1>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Precio</th>
+                    <th>Cantidad</th>
+                    <th>Total</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="cart-items">
+                <!-- Los productos se cargarán dinámicamente aquí -->
+            </tbody>
+        </table>
+        <h3 class="text-right">Total: <span id="cart-total">$0</span></h3>
+        <button class="btn btn-success" onclick="finalizarCompra()">Finalizar Compra</button>
     </div>
 
-    <div class="d-flex justify-content-between align-items-center">
-        <h3>Total: <span id="cart-total">$0</span></h3>
-        <button class="btn btn-primary" onclick="checkout()">Ir a Pagar</button>
-    </div>
-</div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Recupera el carrito desde localStorage
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
 
+            // Obtén el contenedor de la tabla
+            const cartItems = document.getElementById('cart-items');
+            let total = 0;
 
+            // Vacía la tabla y agrega los productos del carrito
+            cart.forEach((product, index) => {
+                const row = document.createElement('tr');
 
-<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="../carrito.js"> 
-</script>
+                row.innerHTML = `
+                    <td>${product.name}</td>
+                    <td>$${product.price}</td>
+                    <td>${product.quantity}</td>
+                    <td>$${product.total}</td>
+                    <td>
+                        <button class="btn btn-danger" onclick="removeProduct(${index})">Eliminar</button>
+                    </td>
+                `;
+
+                cartItems.appendChild(row);
+                total += product.total;
+            });
+
+            // Actualiza el total en la interfaz
+            document.getElementById('cart-total').textContent = `$${total}`;
+        });
+
+        // Función para eliminar un producto del carrito
+        function removeProduct(index) {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            cart.splice(index, 1);
+            localStorage.setItem('cart', JSON.stringify(cart));
+
+            // Actualiza la vista del carrito sin recargar la página
+            updateCartDisplay();
+        }
+
+        // Función para finalizar la compra
+        function finalizarCompra() {
+            alert('Gracias por tu compra');
+            localStorage.removeItem('cart'); // Limpia el carrito
+            updateCartDisplay(); // Actualiza la interfaz del carrito
+        }
+
+        // Función para actualizar la vista del carrito
+        function updateCartDisplay() {
+            const cartItems = document.getElementById('cart-items');
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            let total = 0;
+
+            // Vacía la tabla y agrega los productos del carrito
+            cartItems.innerHTML = ''; // Limpiar contenido previo
+            cart.forEach((product, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${product.name}</td>
+                    <td>$${product.price}</td>
+                    <td>${product.quantity}</td>
+                    <td>$${product.total}</td>
+                    <td>
+                        <button class="btn btn-danger" onclick="removeProduct(${index})">Eliminar</button>
+                    </td>
+                `;
+                cartItems.appendChild(row);
+                total += product.total;
+            });
+
+            // Actualiza el total en la interfaz
+            document.getElementById('cart-total').textContent = `$${total}`;
+        }
+
+        // Función para agregar un producto al carrito (por ejemplo, llamada desde otro lugar en tu app)
+        function addProduct(product) {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+            // Verifica si el producto ya existe en el carrito
+            const existingProductIndex = cart.findIndex(item => item.name === product.name); // Puedes usar un id único también
+
+            if (existingProductIndex !== -1) {
+                // Si el producto ya está, solo actualiza la cantidad
+                cart[existingProductIndex].quantity += product.quantity;
+                cart[existingProductIndex].total = cart[existingProductIndex].quantity * cart[existingProductIndex].price;
+            } else {
+                // Si no está, agrega el producto al carrito
+                cart.push(product);
+            }
+
+            // Guarda el carrito actualizado
+            localStorage.setItem('cart', JSON.stringify(cart));
+
+            // Actualiza la vista del carrito
+            updateCartDisplay();
+        }
+    </script>
+</body>
+</html>
